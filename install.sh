@@ -39,7 +39,7 @@ mount "/dev/$efi_part" /mnt/boot/efi
 reflector --country Hungary --age 6 --sort rate --save /etc/pacman.d/mirrorlist
 
 # Install base system
-pacstrap -K /mnt base linux-lts linux-firmware intel-ucode btrfs-progs nano base-devel
+pacstrap -K /mnt base linux linux-firmware intel-ucode btrfs-progs nano base-devel
 
 # Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
@@ -48,7 +48,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 arch-chroot /mnt /bin/bash <<EOF
 ln -sf /usr/share/zoneinfo/Europe/Budapest /etc/localtime
 hwclock --systohc
-sed -i 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+nano /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" >> /etc/locale.conf
 echo "KEYMAP=hu" >> /etc/vconsole.conf
@@ -56,15 +56,10 @@ echo "ArchLaptop" >> /etc/hostname
 passwd
 useradd -m -G wheel -s /bin/bash mate
 passwd mate
-EDITOR=nano visudo -c -f /etc/sudoers && \
-  sed -i '/^# %wheel ALL=(ALL) ALL/s/^# //' /etc/sudoers
-sed -i '/^#VerbosePkgLists/s/^#//' /etc/pacman.conf
-sed -i '/^#ParallelDownloads/s/^#//' /etc/pacman.conf
-sed -i '/^#Color/s/^#//' /etc/pacman.conf
-sed -i '/^\[multilib\]$/s/^#//' /etc/pacman.conf
-sed -i '/^#Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
+EDITOR=nano visudo
+nano /etc/pacman.conf
 pacman -Sy
-pacman -Sy --noconfirm linux-lts-headers sof-firmware grub efibootmgr networkmanager network-manager-applet acpi acpi_call tlp acpid dialog reflector bluez bluez-utils cups pipewire pipewire-jack pipewire-pulse grub-btrfs git mesa nvidia-dkms nvidia-settings nvidia-utils lib32-nvidia-utils
+pacman -Sy --noconfirm linux-headers sof-firmware grub efibootmgr networkmanager network-manager-applet acpi acpi_call tlp acpid dialog reflector bluez bluez-utils cups pipewire pipewire-jack pipewire-pulse grub-btrfs git mesa nvidia-dkms nvidia-settings nvidia-utils lib32-nvidia-utils
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 systemctl enable NetworkManager bluetooth cups.service tlp acpid
